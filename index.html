@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Jose &amp; Yazmín</title>
+    <link rel="icon" type="image/svg+xml" href="/heart.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles/main.css" />
+  </head>
+  <body>
+    <div id="game">
+      <canvas id="screen" width="256" height="240"></canvas>
+
+      <div id="ui">
+        <!-- HUD -->
+        <div id="hud" class="hidden">
+          <div class="hud-col">
+            <span>JOSE</span>
+            <span id="hud-score">000000</span>
+          </div>
+          <div class="hud-col">
+            <span>&nbsp;</span>
+            <span><i class="px-heart"></i>×<span id="hud-hearts">00</span></span>
+          </div>
+          <div class="hud-col">
+            <span>MUNDO</span>
+            <span id="hud-world">1-1</span>
+          </div>
+          <div class="hud-col">
+            <span>TIEMPO</span>
+            <span id="hud-time">400</span>
+          </div>
+        </div>
+
+        <!-- Pantalla de título -->
+        <div id="screen-title" class="overlay">
+          <div class="title-box">
+            <h1>
+              <span class="title-top">SUPER</span>
+              <span class="title-main">JOSE &amp; YAZMIN</span>
+            </h1>
+          </div>
+          <p class="blink"><span class="kb-only">PRESIONA ENTER</span><span class="touch-only">TOCA PARA EMPEZAR</span></p>
+          <div class="controls-help kb-only">
+            <p class="small">FLECHAS MOVER · ABAJO AGACHARSE</p>
+            <p class="small">Z SALTAR · X CORRER · M SONIDO</p>
+          </div>
+          <p class="small muted">RECORD <span id="title-best">000000</span></p>
+        </div>
+
+        <!-- Final: Jose rescata a Yazmín -->
+        <div id="screen-ending" class="overlay hidden">
+          <div class="ending-box">
+            <p>¡GRACIAS JOSE!</p>
+            <p>MI CORAZON SIEMPRE</p>
+            <p>FUE TUYO <i class="px-heart"></i></p>
+          </div>
+          <p class="small">PUNTOS <span id="ending-score">000000</span></p>
+          <p id="ending-press" class="small blink hidden">
+            <span class="kb-only">PRESIONA ENTER</span><span class="touch-only">TOCA PARA VOLVER</span>
+          </p>
+        </div>
+
+        <!-- Entre niveles: mundo y vidas -->
+        <div id="screen-intro" class="overlay solid hidden">
+          <p>MUNDO <span id="intro-world">1-1</span></p>
+          <p class="intro-lives"><canvas id="intro-jose" width="16" height="16"></canvas> × <span id="intro-lives">3</span></p>
+        </div>
+
+        <!-- Fin del juego -->
+        <div id="screen-gameover" class="overlay solid hidden">
+          <p class="big">GAME OVER</p>
+        </div>
+
+        <!-- Pausa -->
+        <div id="screen-pause" class="overlay hidden">
+          <p class="big">PAUSA</p>
+          <p class="small blink"><span class="kb-only">ENTER PARA SEGUIR</span><span class="touch-only">TOCA II PARA SEGUIR</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controles táctiles (solo en pantallas táctiles) -->
+    <div id="touch" aria-hidden="true">
+      <div class="dpad">
+        <button data-action="left" class="btn-left">◀</button>
+        <button data-action="down" class="btn-down">▼</button>
+        <button data-action="right" class="btn-right">▶</button>
+      </div>
+      <button data-action="start" class="btn-start">II</button>
+      <div class="ab">
+        <button data-action="run" class="btn-b">B</button>
+        <button data-action="jump" class="btn-a">A</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

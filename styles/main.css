@@ -1,0 +1,328 @@
+:root {
+  --scale: 3;
+  --pink: #ff5fa2;
+  --pink-light: #ffd1e6;
+  --pink-deep: #c2185b;
+  --plum: #2a0f24;
+  --plum-2: #3d1535;
+  --white: #fff7fb;
+  --px: calc(1px * var(--scale));
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 40%, var(--plum-2), var(--plum) 70%);
+  color: var(--white);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+/* Contenedor escalado a múltiplo entero de 256×240 (lo fija main.ts) */
+#game {
+  position: relative;
+  width: calc(256px * var(--scale));
+  height: calc(240px * var(--scale));
+  box-shadow:
+    0 0 0 var(--px) var(--pink-deep),
+    0 0 0 calc(var(--px) * 2) var(--pink),
+    0 0 calc(var(--px) * 12) rgba(255, 95, 162, 0.35);
+}
+
+#screen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* ---------- Capa de UI ---------- */
+#ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-size: calc(8px * var(--scale));
+  line-height: 1.25;
+  text-shadow: var(--px) var(--px) 0 rgba(60, 10, 40, 0.55);
+}
+
+.hidden {
+  display: none !important;
+}
+
+#hud {
+  position: absolute;
+  top: calc(8px * var(--scale));
+  left: calc(16px * var(--scale));
+  right: calc(16px * var(--scale));
+  display: flex;
+  justify-content: space-between;
+}
+
+.hud-col {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2px * var(--scale));
+}
+
+.hud-col:nth-child(3),
+.hud-col:nth-child(4) {
+  align-items: flex-end;
+}
+
+/* Corazón pixel-art del HUD (mismo SVG que el favicon) */
+.px-heart {
+  display: inline-block;
+  width: calc(7px * var(--scale));
+  height: calc(6px * var(--scale));
+  margin-right: calc(1px * var(--scale));
+  background: url('/heart.svg') center / contain no-repeat;
+  vertical-align: calc(-1px * var(--scale));
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(10px * var(--scale));
+  text-align: center;
+}
+
+#screen-title {
+  justify-content: flex-start;
+  padding-top: calc(40px * var(--scale));
+}
+
+.title-box {
+  padding: calc(10px * var(--scale)) calc(12px * var(--scale));
+  background: #e8735a;
+  border: var(--px) solid #3a0d1c;
+  box-shadow:
+    inset var(--px) var(--px) 0 #ffb199,
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 #a8402e,
+    calc(var(--px) * 3) calc(var(--px) * 3) 0 rgba(60, 10, 40, 0.45);
+  margin-bottom: calc(18px * var(--scale));
+}
+
+.title-box h1 {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6px * var(--scale));
+  font-weight: normal;
+}
+
+.title-top {
+  font-size: calc(8px * var(--scale));
+  color: var(--pink-light);
+  text-align: left;
+}
+
+.title-main {
+  font-size: calc(12px * var(--scale));
+  color: var(--white);
+  text-shadow:
+    var(--px) var(--px) 0 var(--pink-deep),
+    calc(var(--px) * 2) calc(var(--px) * 2) 0 #3a0d1c;
+}
+
+.big {
+  font-size: calc(16px * var(--scale));
+  color: var(--white);
+}
+
+.small {
+  font-size: calc(6px * var(--scale));
+}
+
+.muted {
+  color: var(--pink-light);
+}
+
+#screen-ending {
+  justify-content: flex-start;
+  padding-top: calc(40px * var(--scale));
+  animation: fade-in 1s steps(6) both;
+}
+
+.ending-box {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8px * var(--scale));
+  padding: calc(10px * var(--scale)) calc(12px * var(--scale));
+  background: rgba(42, 15, 36, 0.8);
+  border: var(--px) solid var(--pink);
+  box-shadow:
+    0 0 0 var(--px) var(--pink-deep),
+    calc(var(--px) * 3) calc(var(--px) * 3) 0 rgba(0, 0, 0, 0.45);
+  color: var(--pink-light);
+  margin-bottom: calc(8px * var(--scale));
+}
+
+.ending-box p:first-child {
+  color: var(--white);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.overlay.solid {
+  background: var(--plum);
+}
+
+#screen-pause {
+  background: rgba(42, 15, 36, 0.55);
+}
+
+.blink {
+  animation: blink 1s steps(1) infinite;
+  color: var(--white);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---------- Entre niveles ---------- */
+#screen-intro {
+  gap: calc(14px * var(--scale));
+}
+
+.intro-lives {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--scale));
+}
+
+#intro-jose {
+  width: calc(16px * var(--scale));
+  height: calc(16px * var(--scale));
+  image-rendering: pixelated;
+}
+
+.controls-help {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(4px * var(--scale));
+}
+
+/* ---------- Teclado vs. táctil ---------- */
+.touch-only {
+  display: none;
+}
+
+body.touch .touch-only {
+  display: inline;
+}
+
+body.touch .kb-only {
+  display: none;
+}
+
+/* ---------- Controles táctiles ---------- */
+#touch {
+  display: none;
+}
+
+body.touch #touch {
+  display: block;
+  position: fixed;
+  inset: auto 0 0 0;
+  height: 0;
+  pointer-events: none;
+}
+
+#touch button {
+  position: fixed;
+  width: 58px;
+  height: 58px;
+  border: 3px solid var(--pink-deep);
+  border-radius: 12px;
+  background: rgba(255, 95, 162, 0.35);
+  color: var(--white);
+  font: 14px 'Press Start 2P', monospace;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+}
+
+#touch button.pressed {
+  background: rgba(255, 95, 162, 0.75);
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* Cruceta a la izquierda: 12 + 3×58 + 2×6 = 198px */
+#touch .btn-left {
+  left: 12px;
+  bottom: 28px;
+}
+
+#touch .btn-down {
+  left: 76px;
+  bottom: 28px;
+}
+
+#touch .btn-right {
+  left: 140px;
+  bottom: 28px;
+}
+
+/* A y B a la derecha: ocupan 12 + 64 + 8 + 64 = 148px */
+#touch .btn-a,
+#touch .btn-b {
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+}
+
+#touch .btn-a {
+  right: 12px;
+  bottom: 52px;
+  background: rgba(255, 79, 154, 0.55);
+}
+
+#touch .btn-b {
+  right: 84px;
+  bottom: 20px;
+}
+
+#touch .btn-start {
+  left: 50%;
+  bottom: 112px;
+  width: 56px;
+  height: 34px;
+  margin-left: -28px;
+  font-size: 10px;
+}
+
+/* En vertical el juego se centra en el espacio que queda sobre los controles */
+body.touch.portrait {
+  padding-bottom: 190px;
+}
