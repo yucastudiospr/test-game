@@ -22,7 +22,7 @@ export type SfxName =
   | 'tick'
   | 'pause';
 
-export type SongName = 'overworld' | 'underground' | 'hurry' | 'clear' | 'death' | 'gameover' | 'ending';
+export type SongName = 'overworld' | 'underground' | 'hurry' | 'clear' | 'death' | 'gameover' | 'ending' | 'crawl';
 
 type Wave = OscillatorType | 'drum';
 
@@ -123,6 +123,41 @@ const SONGS: Record<SongName, Song> = {
     voices: [
       { wave: 'square', vol: 0.06, notes: 'G4 . E4 . C4 - - . D4 E4 C4 - - - - - ' },
       { wave: 'triangle', vol: 0.15, notes: 'C3 . . . G2 - - . F2 G2 C2 - - - - - ' },
+    ],
+  },
+  // Marcha épica del intro (la historia que sube por la pantalla), en La menor
+  crawl: {
+    step: 0.14,
+    loop: true,
+    voices: [
+      {
+        wave: 'square',
+        vol: 0.055,
+        notes:
+          'A4 - - . A4 - - . A4 - C5 - E5 - - - D5 - C5 - B4 - - - A4 - - - - - . . ' +
+          'F4 - - . F4 - - . F4 - A4 - C5 - - - B4 - A4 - G#4 - - - E4 - - - - - . . ' +
+          'A4 - - . A4 - - . C5 - E5 - A5 - - - G5 - F5 - E5 - - - D5 - C5 - B4 - - - ' +
+          'C5 - E5 - D5 - B4 - A4 - - - - - - - E4 - - - A3 - - - - - - - . . . . ',
+      },
+      {
+        wave: 'square',
+        vol: 0.03,
+        notes:
+          'E4 - - . E4 - - . E4 - A4 - C5 - - - B4 - A4 - G#4 - - - E4 - - - - - . . ' +
+          'C4 - - . C4 - - . C4 - F4 - A4 - - - G#4 - F4 - E4 - - - C4 - - - - - . . ' +
+          'E4 - - . E4 - - . A4 - C5 - E5 - - - E5 - D5 - C5 - - - B4 - A4 - G#4 - - - ' +
+          'A4 - C5 - B4 - G#4 - E4 - - - - - - - C4 - - - E3 - - - - - - - . . . . ',
+      },
+      {
+        wave: 'triangle',
+        vol: 0.17,
+        notes:
+          'A2 . A2 . A2 . A2 . A2 . A2 . A2 . A2 . '.repeat(2) +
+          'F2 . F2 . F2 . F2 . F2 . F2 . F2 . F2 . E2 . E2 . E2 . E2 . E2 . E2 . E2 . E2 . ' +
+          'A2 . A2 . A2 . A2 . A2 . A2 . A2 . A2 . F2 . F2 . F2 . F2 . G2 . G2 . G2 . G2 . ' +
+          'A2 . E2 . A2 . E2 . A2 . E2 . A2 . E2 . A2 - - - - - - - A2 - - - . . . . ',
+      },
+      { wave: 'drum', vol: 0.11, notes: 'k . . . s . . . k . k . s . . . '.repeat(8) },
     ],
   },
   // Tema romántico del rescate de Yazmín

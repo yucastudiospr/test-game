@@ -207,6 +207,103 @@ body {
   }
 }
 
+/* ---------- Intro (texto en perspectiva) ---------- */
+#screen-crawl {
+  justify-content: flex-end;
+  overflow: hidden;
+  gap: 0;
+}
+
+.crawl-pretitle {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 calc(16px * var(--scale));
+  font-size: calc(8px * var(--scale));
+  line-height: 1.8;
+  color: #9ad7ff;
+  opacity: 0;
+  transition: opacity 0.6s steps(4);
+}
+
+.crawl-pretitle.show {
+  opacity: 1;
+}
+
+.crawl-stage {
+  position: absolute;
+  inset: 0;
+  perspective: calc(260px * var(--scale));
+  perspective-origin: 50% 50%;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.4s steps(3);
+}
+
+.crawl-stage.show {
+  opacity: 1;
+}
+
+/* Desvanece el texto al alejarse */
+.crawl-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 45%;
+  background: linear-gradient(var(--plum) 25%, rgba(42, 15, 36, 0));
+  pointer-events: none;
+}
+
+/* Plano inclinado desde el borde inferior: el texto entra a tamaño normal y se aleja hacia arriba */
+.crawl-plane {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  transform: rotateX(28deg);
+}
+
+.crawl-text {
+  position: absolute;
+  left: 14%;
+  width: 72%;
+  top: 100%;
+  transform: translateY(var(--y, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: calc(10px * var(--scale));
+  font-size: calc(6px * var(--scale));
+  line-height: 1.7;
+  text-align: justify;
+  color: #ffd23f;
+  text-shadow: var(--px) var(--px) 0 rgba(90, 40, 0, 0.6);
+}
+
+.crawl-ep,
+.crawl-title {
+  text-align: center;
+  color: #ffe77a;
+}
+
+.crawl-ep {
+  margin-bottom: calc(-4px * var(--scale));
+}
+
+.crawl-title {
+  font-size: calc(10px * var(--scale));
+  margin-bottom: calc(6px * var(--scale));
+}
+
+.crawl-skip {
+  position: absolute;
+  bottom: calc(6px * var(--scale));
+  left: 0;
+  right: 0;
+  color: var(--pink-light);
+  opacity: 0.8;
+}
+
 /* ---------- Entre niveles ---------- */
 #screen-intro {
   gap: calc(14px * var(--scale));
@@ -244,32 +341,93 @@ body.touch .kb-only {
   display: none;
 }
 
-/* ---------- Controles táctiles ---------- */
+/* ---------- Barra fija: REINICIAR y CONTROLES ---------- */
+#topbar {
+  position: fixed;
+  top: calc(6px + env(safe-area-inset-top, 0px));
+  right: calc(8px + env(safe-area-inset-right, 0px));
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+#topbar button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 7px;
+  border: 2px solid var(--pink-deep);
+  border-radius: 6px;
+  background: rgba(42, 15, 36, 0.75);
+  color: var(--pink-light);
+  font: 7px 'Press Start 2P', monospace;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#topbar button:hover,
+#topbar button:focus-visible {
+  background: rgba(194, 24, 91, 0.6);
+  outline: none;
+}
+
+#topbar button:active {
+  transform: translateY(1px);
+}
+
+#reset-btn .arrow {
+  font: 11px sans-serif;
+  line-height: 7px;
+}
+
+#controls-toggle .box {
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--pink-light);
+  background: transparent;
+}
+
+#controls-toggle.on {
+  color: var(--white);
+  border-color: var(--pink);
+}
+
+#controls-toggle.on .box {
+  background: var(--pink);
+  border-color: var(--white);
+}
+
+/* ---------- Botones en pantalla ---------- */
 #touch {
+  /* Tamaño de botón: entre 44 y 64 px según la pantalla (screen.ts usa la misma fórmula) */
+  --btn: clamp(44px, 13vmin, 64px);
+  --gap: calc(var(--btn) * 0.12);
+  --edge-x: calc(12px + env(safe-area-inset-left, 0px));
+  --edge-y: calc(14px + env(safe-area-inset-bottom, 0px));
   display: none;
 }
 
-body.touch #touch {
+body.controls #touch {
   display: block;
   position: fixed;
-  inset: auto 0 0 0;
-  height: 0;
+  inset: 0;
   pointer-events: none;
+  z-index: 5;
 }
 
 #touch button {
-  position: fixed;
-  width: 58px;
-  height: 58px;
+  width: var(--btn);
+  height: var(--btn);
   border: 3px solid var(--pink-deep);
   border-radius: 12px;
   background: rgba(255, 95, 162, 0.35);
   color: var(--white);
-  font: 14px 'Press Start 2P', monospace;
+  font: calc(var(--btn) * 0.26) 'Press Start 2P', monospace;
   pointer-events: auto;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+  cursor: pointer;
 }
 
 #touch button.pressed {
@@ -278,51 +436,57 @@ body.touch #touch {
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
 }
 
-/* Cruceta a la izquierda: 12 + 3×58 + 2×6 = 198px */
-#touch .btn-left {
-  left: 12px;
-  bottom: 28px;
+/* Cruceta abajo a la izquierda */
+#touch .dpad {
+  position: absolute;
+  left: var(--edge-x);
+  bottom: var(--edge-y);
+  display: flex;
+  gap: var(--gap);
 }
 
-#touch .btn-down {
-  left: 76px;
-  bottom: 28px;
+/* A y B abajo a la derecha, A un poco más arriba como en el mando del NES */
+#touch .ab {
+  position: absolute;
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  bottom: var(--edge-y);
+  display: flex;
+  align-items: flex-end;
+  gap: var(--gap);
 }
 
-#touch .btn-right {
-  left: 140px;
-  bottom: 28px;
-}
-
-/* A y B a la derecha: ocupan 12 + 64 + 8 + 64 = 148px */
 #touch .btn-a,
 #touch .btn-b {
   border-radius: 50%;
-  width: 64px;
-  height: 64px;
+  width: calc(var(--btn) * 1.1);
+  height: calc(var(--btn) * 1.1);
 }
 
 #touch .btn-a {
-  right: 12px;
-  bottom: 52px;
+  margin-bottom: calc(var(--btn) * 0.5);
   background: rgba(255, 79, 154, 0.55);
 }
 
-#touch .btn-b {
-  right: 84px;
-  bottom: 20px;
-}
-
+/* Pausa: con los botones debajo del juego, centrado sobre los demás */
 #touch .btn-start {
+  position: absolute;
   left: 50%;
-  bottom: 112px;
-  width: 56px;
-  height: 34px;
-  margin-left: -28px;
-  font-size: 10px;
+  bottom: calc(var(--edge-y) + var(--btn) * 1.6 + 10px);
+  transform: translateX(-50%);
+  width: calc(var(--btn) * 0.95);
+  height: calc(var(--btn) * 0.55);
+  font-size: calc(var(--btn) * 0.2);
 }
 
-/* En vertical el juego se centra en el espacio que queda sobre los controles */
-body.touch.portrait {
-  padding-bottom: 190px;
+/* Con los botones a los lados del juego, la pausa va sobre A/B */
+body:not(.touch-bottom) #touch .btn-start {
+  left: auto;
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  transform: none;
+  bottom: calc(var(--edge-y) + var(--btn) * 1.6 + 24px);
+}
+
+/* Con los botones debajo, el juego se centra en el espacio que queda (screen.ts fija --touch-h) */
+body.controls.touch-bottom {
+  padding-bottom: var(--touch-h, 0px);
 }

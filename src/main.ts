@@ -1,4 +1,4 @@
-import { SCREEN_W, TILE } from './config';
+import { SCREEN_H, SCREEN_W, TILE } from './config';
 import { sound } from './engine/audio';
 import { GameLoop } from './engine/loop';
 import { Input, type Action } from './engine/input';
@@ -11,7 +11,7 @@ import type { LevelData } from './world/level';
 import { LEVEL_1_1 } from './world/level1-1';
 import { LEVEL_1_2 } from './world/level1-2';
 
-type State = 'title' | 'intro' | 'playing' | 'paused' | 'gameover' | 'ending';
+type State = 'title' | 'crawl' | 'intro' | 'playing' | 'paused' | 'gameover' | 'ending';
 
 const LEVELS: readonly LevelData[] = [LEVEL_1_1, LEVEL_1_2];
 const GAME_OVER_SECONDS = 3.5;
@@ -19,6 +19,9 @@ const GAME_OVER_SECONDS = 3.5;
 const INTRO_SECONDS = 2.5;
 /** Tras el mensaje de Yazmín, cuánto esperar antes de aceptar ENTER. */
 const ENDING_MIN_SECONDS = 3;
+/** Intro: segundos del "Hace mucho tiempo..." y velocidad del texto (px lógicos por segundo). */
+const CRAWL_PRETITLE_SECONDS = 3.5;
+const CRAWL_SPEED = 20;
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id);
@@ -34,12 +37,17 @@ const introScreen = $('screen-intro');
 const introWorld = $('intro-world');
 const introLives = $('intro-lives');
 const introJose = $('intro-jose') as HTMLCanvasElement;
+const crawlScreen = $('screen-crawl');
+const crawlPretitle = $('crawl-pretitle');
+const crawlStage = $('crawl-stage');
+const crawlText = $('crawl-text');
 const endingScreen = $('screen-ending');
 const endingScore = $('ending-score');
 const endingPress = $('ending-press');
 const titleBest = $('title-best');
 
-const ctx = setupScreen(canvas, $('game'));
+const screen = setupScreen(canvas, $('game'));
+const ctx = screen.ctx;
 const input = new Input();
 const hud = new Hud();
 const sprites = buildSprites();
@@ -65,8 +73,11 @@ function setState(next: State): void {
   gameOverScreen.classList.toggle('hidden', next !== 'gameover');
   introScreen.classList.toggle('hidden', next !== 'intro');
   endingScreen.classList.toggle('hidden', next !== 'ending');
+  crawlScreen.classList.toggle('hidden', next !== 'crawl');
+  crawlPretitle.classList.remove('show');
+  crawlStage.classList.remove('show');
   endingPress.classList.add('hidden');
-  hud.show(next !== 'title');
+  hud.show(next !== 'title' && next !== 'crawl');
 }
 
 /** Prepara el nivel y muestra la pantalla "MUNDO × vidas" antes de jugar. */
@@ -79,9 +90,53 @@ function loadLevel(index: number): void {
   setState('intro');
 }
 
+/** Partida nueva: primero la historia, luego el nivel 1-1. */
 function startRun(): void {
   stats = newStats();
-  loadLevel(0);
+  levelIndex = 0;
+  game = new Game(LEVELS[0]!, stats);
+  setState('crawl');
+  sound.music('crawl');
+}
+
+/** Intro: "Hace mucho tiempo..." y después el texto subiendo en perspectiva. */
+function updateCrawl(): void {
+  const t = stateTime;
+  if (t < CRAWL_PRETITLE_SECONDS) {
+    crawlPretitle.classList.toggle('show', t > 0.3 && t < CRAWL_PRETITLE_SECONDS - 0.6);
+    return;
+  }
+  crawlStage.classList.add('show');
+  // La escala actual: alto del escenario entre los 240 px lógicos
+  const stageH = crawlStage.clientHeight;
+  const scale = stageH / SCREEN_H;
+  // El texto empieza justo debajo del plano y sube hasta perderse en la distancia
+  const y = -(t - CRAWL_PRETITLE_SECONDS) * CRAWL_SPEED * scale;
+  crawlText.style.setProperty('--y', `${y}px`);
+  if (y < -(crawlText.offsetHeight + stageH * 0.9)) loadLevel(0);
+}
+
+/** Cielo nocturno del intro: estrellas rosadas que titilan (posiciones fijas). */
+const STARS = Array.from({ length: 70 }, (_, i) => {
+  // Generador determinista para que las estrellas no cambien entre frames
+  const r = (n: number) => ((Math.sin(i * 127.1 + n * 311.7) * 43758.5453) % 1 + 1) % 1;
+  return { x: Math.floor(r(1) * SCREEN_W), y: Math.floor(r(2) * SCREEN_H), phase: r(3) * 6.28, big: r(4) > 0.8 };
+});
+
+function renderStars(): void {
+  ctx.fillStyle = '#2a0f24';
+  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  for (const s of STARS) {
+    const twinkle = Math.sin(animTime * 2 + s.phase);
+    if (twinkle < -0.6) continue;
+    ctx.fillStyle = twinkle > 0.4 ? '#fff7fb' : '#ffb6d9';
+    if (s.big) {
+      ctx.fillRect(s.x - 1, s.y, 3, 1);
+      ctx.fillRect(s.x, s.y - 1, 1, 3);
+    } else {
+      ctx.fillRect(s.x, s.y, 1, 1);
+    }
+  }
 }
 
 function recordBest(): void {
@@ -123,6 +178,13 @@ function update(dt: number): void {
       if (input.wasPressed('start') || input.wasPressed('jump')) startRun();
       break;
     }
+    case 'crawl':
+      if (input.wasPressed('start') || input.wasPressed('jump')) {
+        loadLevel(0);
+        break;
+      }
+      updateCrawl();
+      break;
     case 'intro':
       if (stateTime > INTRO_SECONDS) {
         setState('playing');
@@ -167,6 +229,10 @@ function update(dt: number): void {
 }
 
 function render(alpha: number): void {
+  if (state === 'crawl') {
+    renderStars();
+    return;
+  }
   // Pausado no hay tick nuevo: dibujar en la posición actual
   const a = state === 'paused' ? 1 : alpha;
   game.render(ctx, sprites, world, a, animTime, state !== 'title');
@@ -189,7 +255,44 @@ function render(alpha: number): void {
 for (const ev of ['keydown', 'pointerdown'] as const) window.addEventListener(ev, () => sound.unlock());
 window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyM') sound.toggleMute();
+  if (e.code === 'KeyC') screen.toggleControls();
+  if (e.code === 'KeyR') resetGame();
 });
+
+/** Reiniciar: vuelve al título desde cualquier estado (también con la tecla R). */
+function resetGame(): void {
+  if (state === 'title') return;
+  if (state === 'playing' || state === 'ending') recordBest();
+  sound.setPaused(false);
+  input.reset();
+  backToTitle();
+}
+
+const resetBtn = $('reset-btn');
+resetBtn.addEventListener('click', () => {
+  resetGame();
+  resetBtn.blur();
+});
+resetBtn.addEventListener('keydown', (e) => e.preventDefault());
+
+// Botón CONTROLES: muestra u oculta los botones en pantalla (también con la tecla C)
+const controlsToggle = $('controls-toggle');
+controlsToggle.addEventListener('click', () => {
+  screen.toggleControls();
+  controlsToggle.blur();
+});
+// Que el botón no robe las teclas del juego (Espacio/Enter lo activarían de nuevo)
+controlsToggle.addEventListener('keydown', (e) => e.preventDefault());
+
+// Si se ocultan los controles con un botón presionado, soltarlo
+new MutationObserver(() => {
+  if (!screen.controlsVisible()) {
+    for (const btn of document.querySelectorAll<HTMLButtonElement>('#touch button[data-action]')) {
+      btn.classList.remove('pressed');
+      input.release(btn.dataset.action as Action, `touch-${btn.dataset.action}`);
+    }
+  }
+}).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
 // Controles táctiles: cada botón mantiene su acción mientras esté presionado
 for (const btn of document.querySelectorAll<HTMLButtonElement>('#touch button[data-action]')) {
@@ -216,7 +319,7 @@ for (const btn of document.querySelectorAll<HTMLButtonElement>('#touch button[da
 
 // Tocar la pantalla del juego sirve para empezar y para salir del final
 $('game').addEventListener('pointerdown', () => {
-  if (state === 'title' || state === 'ending') input.press('start', 'tap');
+  if (state === 'title' || state === 'crawl' || state === 'ending' || state === 'paused') input.press('start', 'tap');
 });
 window.addEventListener('pointerup', () => input.release('start', 'tap'));
 

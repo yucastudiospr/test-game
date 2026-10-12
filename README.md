@@ -24,6 +24,15 @@ npm run build    # genera dist/ (se puede subir a cualquier hosting estático)
 | Correr      | X / Shift / J        | B      |
 | Pausa       | Enter / P            | II     |
 | Sonido      | M                    | —      |
+| Botones     | C                    | botón CONTROLES |
+
+Los botones en pantalla se muestran por defecto en dispositivos táctiles; el botón **CONTROLES**
+(arriba a la derecha) o la tecla **C** los muestran u ocultan en cualquier dispositivo y la
+preferencia se guarda en el navegador. El juego se escala para llenar la pantalla y acomoda los
+botones debajo o a los lados, según lo que lo deje más grande.
+
+Al empezar una partida nueva, la historia sube por la pantalla al estilo de las películas del
+espacio (Enter, Z o un toque la saltan).
 
 Solo en desarrollo: **H** muestra la hitbox, **N** salta cerca del final del nivel.
 
@@ -31,7 +40,7 @@ Solo en desarrollo: **H** muestra la hitbox, **N** salta cerca del final del niv
 
 ```
 src/
-├── main.ts          máquina de estados: título, intro, juego, pausa, game over, final
+├── main.ts          máquina de estados: título, historia, intro, juego, pausa, game over, final
 ├── game.ts          una partida dentro de un nivel: colisiones, puntos, bandera, rescate
 ├── config.ts        resolución (256×240), tamaño de tile, tiempos
 ├── engine/          loop de paso fijo, input, cámara, física AABB, audio, escalado

@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Jose &amp; Yazmín</title>
     <link rel="icon" type="image/svg+xml" href="/heart.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -47,6 +47,7 @@
           <div class="controls-help kb-only">
             <p class="small">FLECHAS MOVER · ABAJO AGACHARSE</p>
             <p class="small">Z SALTAR · X CORRER · M SONIDO</p>
+            <p class="small">C BOTONES · R REINICIAR</p>
           </div>
           <p class="small muted">RECORD <span id="title-best">000000</span></p>
         </div>
@@ -64,6 +65,34 @@
           </p>
         </div>
 
+        <!-- Intro: la historia sube por la pantalla, al estilo de las películas del espacio -->
+        <div id="screen-crawl" class="overlay hidden">
+          <p id="crawl-pretitle" class="crawl-pretitle">HACE MUCHO TIEMPO,<br />EN UN REINO<br />MUY, MUY ROSADO...</p>
+          <div id="crawl-stage" class="crawl-stage">
+            <div class="crawl-plane">
+            <div id="crawl-text" class="crawl-text">
+              <p class="crawl-ep">EPISODIO I</p>
+              <p class="crawl-title">EL CORAZON ROBADO</p>
+              <p>
+                Reina la paz en el Reino Rosado. La Princesa Yazmin guarda el Corazon Eterno, la joya que mantiene el
+                cielo color de algodon y los hongos siempre dulces.
+              </p>
+              <p>
+                Pero el malvado Rey Koopon, celoso de tanta ternura, ha raptado a la princesa y la ha escondido en su
+                castillo de ladrillos, al otro lado del Mundo 1-2.
+              </p>
+              <p>Sin ella, el cielo empieza a perder su color y las nubes ya no sonrien.</p>
+              <p>
+                Solo un plomero de gorra roja, con un salto legendario y el corazon mas grande del reino, puede
+                rescatarla.
+              </p>
+              <p>Su nombre es Jose. Y esta vez, el amor no se deja en pausa...</p>
+            </div>
+            </div>
+          </div>
+          <p class="small crawl-skip"><span class="kb-only">ENTER PARA SALTAR</span><span class="touch-only">TOCA PARA SALTAR</span></p>
+        </div>
+
         <!-- Entre niveles: mundo y vidas -->
         <div id="screen-intro" class="overlay solid hidden">
           <p>MUNDO <span id="intro-world">1-1</span></p>
@@ -78,12 +107,22 @@
         <!-- Pausa -->
         <div id="screen-pause" class="overlay hidden">
           <p class="big">PAUSA</p>
-          <p class="small blink"><span class="kb-only">ENTER PARA SEGUIR</span><span class="touch-only">TOCA II PARA SEGUIR</span></p>
+          <p class="small blink"><span class="kb-only">ENTER PARA SEGUIR</span><span class="touch-only">TOCA PARA SEGUIR</span></p>
         </div>
       </div>
     </div>
 
-    <!-- Controles táctiles (solo en pantallas táctiles) -->
+    <!-- Botones fijos: reiniciar la partida (R) y mostrar u ocultar los botones en pantalla (C) -->
+    <div id="topbar">
+      <button id="reset-btn" type="button" title="Volver al inicio (R)">
+        <span class="arrow">↺</span>REINICIAR
+      </button>
+      <button id="controls-toggle" type="button" aria-pressed="false" title="Mostrar u ocultar los botones en pantalla (C)">
+        <span class="box"></span>CONTROLES
+      </button>
+    </div>
+
+    <!-- Botones en pantalla: se muestran en táctil por defecto o cuando el usuario los activa -->
     <div id="touch" aria-hidden="true">
       <div class="dpad">
         <button data-action="left" class="btn-left">◀</button>
