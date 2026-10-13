@@ -1,9 +1,9 @@
-import { SCREEN_W, TILE } from '../config';
+import { SCREEN_H, SCREEN_W, TILE } from '../config';
 import { drawSky } from '../graphics/background';
 import { PAL } from '../graphics/palette';
 import type { SpriteSheet } from '../graphics/sprites';
 import { drawTinyText, tinyTextWidth } from '../graphics/tinyfont';
-import type { LevelData } from '../world/level';
+import type { LevelData, Theme } from '../world/level';
 import { LEVELS_PER_WORLD, WORLDS } from '../world/levels';
 import type { Progress } from './progress';
 
@@ -87,20 +87,32 @@ export class WorldMap {
   draw(ctx: CanvasRenderingContext2D, s: SpriteSheet, progress: Progress, time: number): void {
     const world = this.world;
     const lastWorld = world === WORLDS - 1;
-    drawSky(ctx, lastWorld ? 'night' : 'overworld');
-    ctx.drawImage(s.cloudBig, 24, 14);
-    ctx.drawImage(s.cloudSmall, 176, 30);
-    ctx.drawImage(s.cloudSmall, 118, 52);
-
-    // Suelo y decorado abajo
+    // Cada mundo con su tema: día, subterráneo y noche
+    const theme: Theme = world === 1 ? 'underground' : lastWorld ? 'night' : 'overworld';
     const groundRow = 13;
     const groundY = groundRow * TILE;
-    ctx.drawImage(s.hillBig, 0, groundY - s.hillBig.height + 1);
-    ctx.drawImage(s.hillSmall, 168, groundY - s.hillSmall.height + 1);
-    ctx.drawImage(s.bush, 104, groundY - s.bush.height + 1);
-    for (let tx = 0; tx < SCREEN_W / TILE; tx++) {
-      ctx.drawImage(s.ground, tx * TILE, groundY);
-      ctx.drawImage(s.ground, tx * TILE, groundY + TILE);
+    if (theme === 'underground') {
+      ctx.fillStyle = PAL.underBg;
+      ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+      // Techo de ladrillos y columnas, como en los niveles subterráneos
+      for (let tx = 0; tx < SCREEN_W / TILE; tx++) ctx.drawImage(s.underground.brick, tx * TILE, 0);
+      for (const cx of [0, 240]) for (let ty = 1; ty < groundRow; ty++) ctx.drawImage(s.underground.brick, cx, ty * TILE);
+      for (let tx = 0; tx < SCREEN_W / TILE; tx++) {
+        ctx.drawImage(s.underground.ground, tx * TILE, groundY);
+        ctx.drawImage(s.underground.ground, tx * TILE, groundY + TILE);
+      }
+    } else {
+      drawSky(ctx, theme);
+      ctx.drawImage(s.cloudBig, 24, 14);
+      ctx.drawImage(s.cloudSmall, 176, 30);
+      ctx.drawImage(s.cloudSmall, 118, 52);
+      ctx.drawImage(s.hillBig, 0, groundY - s.hillBig.height + 1);
+      ctx.drawImage(s.hillSmall, 168, groundY - s.hillSmall.height + 1);
+      ctx.drawImage(s.bush, 104, groundY - s.bush.height + 1);
+      for (let tx = 0; tx < SCREEN_W / TILE; tx++) {
+        ctx.drawImage(s.ground, tx * TILE, groundY);
+        ctx.drawImage(s.ground, tx * TILE, groundY + TILE);
+      }
     }
 
     // Niveles de este mundo

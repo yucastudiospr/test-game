@@ -17,6 +17,7 @@ export const PHYS = {
   releaseDecel: 183, // soltar la dirección en el suelo
   skidDecel: 366, // cambiar de dirección corriendo
   airAccel: 134,
+  airTurnDecel: 420, // cambiar de dirección en el aire: frena rápido para poder volver
   jumpSpeed: 250, // salto parado (~4.4 tiles)
   jumpSpeedRunBonus: 25, // extra a velocidad máxima de carrera (~5.4 tiles)
   gravityHold: 440, // subiendo con el botón presionado
@@ -167,8 +168,9 @@ export class Player extends Entity {
 
     if (dir !== 0) {
       if (moving !== 0 && moving !== dir) {
-        // Cambio de dirección: derrape en el suelo, control limitado en el aire
-        this.vx += dir * (this.onGround ? PHYS.skidDecel : PHYS.airAccel) * dt;
+        // Cambio de dirección: derrape en el suelo; en el aire frena rápido y arranca hacia el otro lado
+        this.vx += dir * (this.onGround ? PHYS.skidDecel : PHYS.airTurnDecel) * dt;
+        if (!this.onGround && Math.sign(this.vx) === dir) this.vx = dir * Math.max(Math.abs(this.vx), PHYS.minWalk);
         this.skidding = this.onGround;
       } else if (speed < max) {
         const accel = this.onGround ? (running ? PHYS.runAccel : PHYS.walkAccel) : PHYS.airAccel;
@@ -177,7 +179,7 @@ export class Player extends Entity {
         // Soltó "correr" yendo rápido: baja suave hasta la velocidad de caminar
         this.vx = dir * approach(speed, max, PHYS.releaseDecel * dt);
       }
-      if (this.onGround) this.facing = dir as 1 | -1;
+      this.facing = dir as 1 | -1;
     } else if (this.onGround) {
       this.vx = approach(this.vx, 0, PHYS.releaseDecel * dt);
     }

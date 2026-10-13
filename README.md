@@ -35,7 +35,7 @@ preferencia se guarda en el navegador. El juego se escala para llenar la pantall
 botones debajo o a los lados, según lo que lo deje más grande.
 
 La primera vez, la historia sube por la pantalla al estilo de las películas del espacio (Enter,
-Z o un toque la saltan). Después aparece el **mapa**, una página por mundo: se puede jugar
+Z o un toque la saltan). Después aparece el **mapa**, una página por mundo (día, subterráneo y noche): se puede jugar
 cualquier nivel, en el orden que se quiera (flechas o un toque para elegir, Enter o un segundo
 toque para jugar; el tubo de la esquina lleva al mundo siguiente). Los niveles
 completados se marcan con un corazón y guardan su mejor puntuación; el progreso, el récord y la
@@ -60,6 +60,19 @@ Los niveles 1-1 y 1-2 están escritos a mano; 1-3 a 1-6 y 3-7 con primitivas (es
 plataformas) y el resto se componen por semilla, con dificultad creciente por mundo. Todos pasan
 por el mismo validador: filas del mismo ancho, enemigos con apoyo, y ningún tramo sin dónde caer
 de más de 4 tiles.
+
+## Probar los niveles sin jugarlos
+
+```bash
+node scripts/playtest.mjs            # todos los niveles, caminando, sin enemigos
+node scripts/playtest.mjs 2-3 --diag # un nivel, con el tramo y los últimos instantes si cae
+node scripts/playtest.mjs --run      # corriendo siempre (más exigente)
+node scripts/playtest.mjs --no-invincible   # los enemigos también cuentan
+```
+
+Un bot con la física real del juego (sin dibujar, acelerado) camina a la derecha, sube escalones
+con saltos cortos, salta huecos según su ancho y reporta dónde se atasca o cae. Sirve para
+detectar saltos imposibles o demasiado exigentes; los 21 niveles lo pasan caminando.
 ```
 
 Los niveles son texto: cada carácter es un tile (ver la leyenda en `src/world/tiles.ts` y `src/world/level.ts`).
