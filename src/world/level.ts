@@ -1,7 +1,7 @@
 import { Tile, TILE_CHARS } from './tiles';
 import { TileMap } from './tilemap';
 
-export type Theme = 'overworld' | 'underground' | 'night';
+export type Theme = 'overworld' | 'underground' | 'night' | 'sunset';
 
 /** Definición de un nivel tal cual se escribe en su archivo. */
 export interface LevelData {

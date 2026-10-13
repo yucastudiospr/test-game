@@ -6,7 +6,7 @@ import type { SpriteSheet } from './sprites';
 
 /** Cielo en bandas horizontales (las paletas del NES no tenían degradados reales). */
 export function drawSky(ctx: CanvasRenderingContext2D, theme: Theme = 'overworld'): void {
-  const sky = theme === 'night' ? PAL.nightSky : PAL.sky;
+  const sky = theme === 'night' ? PAL.nightSky : theme === 'sunset' ? PAL.sunsetSky : PAL.sky;
   const bands = sky.length;
   const bandH = Math.ceil(SCREEN_H / bands);
   sky.forEach((color, i) => {

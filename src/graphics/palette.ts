@@ -4,6 +4,8 @@ export const PAL = {
   sky: ['#ffb6d9', '#ffc2df', '#ffcce5', '#ffd6e8'],
   // Cielo de noche (Mundo 3): morados con el horizonte rosado
   nightSky: ['#2a1442', '#3b1d58', '#55286e', '#7a3a84'],
+  // Cielo de atardecer (Mundo 4): naranjas que bajan al rosado
+  sunsetSky: ['#ff8c5a', '#ff9f6e', '#ffb38a', '#ffc7b0'],
   cloud: '#fff4fa',
   cloudShade: '#e6d5ff',
   cloudOutline: '#b99be8',

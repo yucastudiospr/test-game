@@ -27,6 +27,8 @@ const EXIT_X = 36;
 /** Donde termina el camino punteado. */
 const PATH_END: Point = { x: 64, y: 152 };
 const NODE = 12;
+/** Tema de la página del mapa de cada mundo. */
+const MAP_THEMES: readonly Theme[] = ['overworld', 'underground', 'night', 'sunset', 'night', 'underground'];
 const JOSE_SPEED = 160;
 const TAP_RADIUS = 18;
 
@@ -87,8 +89,8 @@ export class WorldMap {
   draw(ctx: CanvasRenderingContext2D, s: SpriteSheet, progress: Progress, time: number): void {
     const world = this.world;
     const lastWorld = world === WORLDS - 1;
-    // Cada mundo con su tema: día, subterráneo y noche
-    const theme: Theme = world === 1 ? 'underground' : lastWorld ? 'night' : 'overworld';
+    // Cada mundo con su tema
+    const theme: Theme = MAP_THEMES[world] ?? 'overworld';
     const groundRow = 13;
     const groundY = groundRow * TILE;
     if (theme === 'underground') {

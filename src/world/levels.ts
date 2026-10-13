@@ -20,9 +20,30 @@ import { LEVEL_3_4 } from './level3-4';
 import { LEVEL_3_5 } from './level3-5';
 import { LEVEL_3_6 } from './level3-6';
 import { LEVEL_3_7 } from './level3-7';
+import { LEVEL_4_1 } from './level4-1';
+import { LEVEL_4_2 } from './level4-2';
+import { LEVEL_4_3 } from './level4-3';
+import { LEVEL_4_4 } from './level4-4';
+import { LEVEL_4_5 } from './level4-5';
+import { LEVEL_4_6 } from './level4-6';
+import { LEVEL_4_7 } from './level4-7';
+import { LEVEL_5_1 } from './level5-1';
+import { LEVEL_5_2 } from './level5-2';
+import { LEVEL_5_3 } from './level5-3';
+import { LEVEL_5_4 } from './level5-4';
+import { LEVEL_5_5 } from './level5-5';
+import { LEVEL_5_6 } from './level5-6';
+import { LEVEL_5_7 } from './level5-7';
+import { LEVEL_6_1 } from './level6-1';
+import { LEVEL_6_2 } from './level6-2';
+import { LEVEL_6_3 } from './level6-3';
+import { LEVEL_6_4 } from './level6-4';
+import { LEVEL_6_5 } from './level6-5';
+import { LEVEL_6_6 } from './level6-6';
+import { LEVEL_6_7 } from './level6-7';
 
-export const WORLDS = 3;
+export const WORLDS = 6;
 export const LEVELS_PER_WORLD = 7;
 
-/** Todos los niveles en orden (3 mundos de 7). El último termina con el rescate de Yazmín. */
-export const LEVELS: readonly LevelData[] = [LEVEL_1_1, LEVEL_1_2, LEVEL_1_3, LEVEL_1_4, LEVEL_1_5, LEVEL_1_6, LEVEL_1_7, LEVEL_2_1, LEVEL_2_2, LEVEL_2_3, LEVEL_2_4, LEVEL_2_5, LEVEL_2_6, LEVEL_2_7, LEVEL_3_1, LEVEL_3_2, LEVEL_3_3, LEVEL_3_4, LEVEL_3_5, LEVEL_3_6, LEVEL_3_7];
+/** Todos los niveles en orden (6 mundos de 7). El último termina con el rescate de Yazmín. */
+export const LEVELS: readonly LevelData[] = [LEVEL_1_1, LEVEL_1_2, LEVEL_1_3, LEVEL_1_4, LEVEL_1_5, LEVEL_1_6, LEVEL_1_7, LEVEL_2_1, LEVEL_2_2, LEVEL_2_3, LEVEL_2_4, LEVEL_2_5, LEVEL_2_6, LEVEL_2_7, LEVEL_3_1, LEVEL_3_2, LEVEL_3_3, LEVEL_3_4, LEVEL_3_5, LEVEL_3_6, LEVEL_3_7, LEVEL_4_1, LEVEL_4_2, LEVEL_4_3, LEVEL_4_4, LEVEL_4_5, LEVEL_4_6, LEVEL_4_7, LEVEL_5_1, LEVEL_5_2, LEVEL_5_3, LEVEL_5_4, LEVEL_5_5, LEVEL_5_6, LEVEL_5_7, LEVEL_6_1, LEVEL_6_2, LEVEL_6_3, LEVEL_6_4, LEVEL_6_5, LEVEL_6_6, LEVEL_6_7];
