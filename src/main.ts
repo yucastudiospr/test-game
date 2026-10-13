@@ -7,13 +7,11 @@ import { Game, type RunStats } from './game';
 import { WorldRenderer } from './graphics/renderer';
 import { buildSprites } from './graphics/sprites';
 import { Hud, loadBest, saveBest } from './ui/hud';
-import type { LevelData } from './world/level';
-import { LEVEL_1_1 } from './world/level1-1';
-import { LEVEL_1_2 } from './world/level1-2';
+import { loadProgress, markCleared, saveProgress } from './ui/progress';
+import { WorldMap } from './ui/worldmap';
+import { LEVELS } from './world/levels';
 
-type State = 'title' | 'crawl' | 'intro' | 'playing' | 'paused' | 'gameover' | 'ending';
-
-const LEVELS: readonly LevelData[] = [LEVEL_1_1, LEVEL_1_2];
+type State = 'title' | 'crawl' | 'map' | 'intro' | 'playing' | 'paused' | 'gameover' | 'ending';
 const GAME_OVER_SECONDS = 3.5;
 /** Cuánto dura la pantalla "MUNDO 1-1 × vidas" antes de cada intento. */
 const INTRO_SECONDS = 2.5;
@@ -41,6 +39,9 @@ const crawlScreen = $('screen-crawl');
 const crawlPretitle = $('crawl-pretitle');
 const crawlStage = $('crawl-stage');
 const crawlText = $('crawl-text');
+const mapScreen = $('screen-map');
+const mapName = $('map-name');
+const mapBest = $('map-best');
 const endingScreen = $('screen-ending');
 const endingScore = $('ending-score');
 const endingPress = $('ending-press');
@@ -55,6 +56,12 @@ const world = new WorldRenderer(ctx, sprites);
 introJose.getContext('2d')?.drawImage(sprites.jose.idle.r, 0, 0);
 
 const newStats = (): RunStats => ({ score: 0, hearts: 0, lives: 3, big: false });
+
+const progress = loadProgress();
+const worldMap = new WorldMap(LEVELS);
+worldMap.select(progress.selected, true);
+/** Nodo tocado en el mapa (pantalla táctil o ratón), pendiente de procesar en el próximo tick. */
+let mapTap: number | null = null;
 
 let stats = newStats();
 let levelIndex = 0;
@@ -74,10 +81,11 @@ function setState(next: State): void {
   introScreen.classList.toggle('hidden', next !== 'intro');
   endingScreen.classList.toggle('hidden', next !== 'ending');
   crawlScreen.classList.toggle('hidden', next !== 'crawl');
+  mapScreen.classList.toggle('hidden', next !== 'map');
   crawlPretitle.classList.remove('show');
   crawlStage.classList.remove('show');
   endingPress.classList.add('hidden');
-  hud.show(next !== 'title' && next !== 'crawl');
+  hud.show(next !== 'title' && next !== 'crawl' && next !== 'map');
 }
 
 /** Prepara el nivel y muestra la pantalla "MUNDO × vidas" antes de jugar. */
@@ -90,13 +98,66 @@ function loadLevel(index: number): void {
   setState('intro');
 }
 
-/** Partida nueva: primero la historia, luego el nivel 1-1. */
+/** Partida nueva: la historia (solo la primera vez) y luego el mapa para elegir nivel. */
 function startRun(): void {
   stats = newStats();
   levelIndex = 0;
   game = new Game(LEVELS[0]!, stats);
+  if (progress.introSeen) {
+    enterMap();
+    return;
+  }
   setState('crawl');
   sound.music('crawl');
+}
+
+function finishCrawl(): void {
+  progress.introSeen = true;
+  saveProgress(progress);
+  enterMap();
+}
+
+/** Mapa de niveles. Las vidas y los puntos de la partida se conservan. */
+function enterMap(): void {
+  mapTap = null;
+  setState('map');
+  refreshMapText();
+  if (sound.playing !== 'overworld') sound.music('overworld');
+}
+
+function refreshMapText(): void {
+  const level = LEVELS[worldMap.selected]!;
+  mapName.textContent = `MUNDO ${level.name}`;
+  const best = progress.cleared[level.name];
+  mapBest.textContent = best === undefined ? 'SIN COMPLETAR' : `MEJOR ${String(best).padStart(6, '0')}`;
+}
+
+function updateMap(dt: number): void {
+  worldMap.update(dt);
+  let play = false;
+  if (mapTap !== null) {
+    if (mapTap === worldMap.selected) play = true;
+    else worldMap.select(mapTap);
+    mapTap = null;
+  }
+  if (input.wasPressed('left') || input.wasPressed('up')) worldMap.move(-1);
+  if (input.wasPressed('right') || input.wasPressed('down')) worldMap.move(1);
+  if (input.wasPressed('start') || input.wasPressed('jump')) play = true;
+  refreshMapText();
+  if (play) {
+    progress.selected = worldMap.selected;
+    saveProgress(progress);
+    loadLevel(worldMap.selected);
+  }
+}
+
+/** Nivel superado: se guarda y se vuelve al mapa con el siguiente elegido. */
+function onClear(): void {
+  markCleared(progress, game.level.name, stats.score);
+  worldMap.select(Math.min(levelIndex + 1, LEVELS.length - 1));
+  progress.selected = worldMap.selected;
+  saveProgress(progress);
+  enterMap();
 }
 
 /** Intro: "Hace mucho tiempo..." y después el texto subiendo en perspectiva. */
@@ -113,7 +174,7 @@ function updateCrawl(): void {
   // El texto empieza justo debajo del plano y sube hasta perderse en la distancia
   const y = -(t - CRAWL_PRETITLE_SECONDS) * CRAWL_SPEED * scale;
   crawlText.style.setProperty('--y', `${y}px`);
-  if (y < -(crawlText.offsetHeight + stageH * 0.9)) loadLevel(0);
+  if (y < -(crawlText.offsetHeight + stageH * 0.9)) finishCrawl();
 }
 
 /** Cielo nocturno del intro: estrellas rosadas que titilan (posiciones fijas). */
@@ -180,10 +241,13 @@ function update(dt: number): void {
     }
     case 'crawl':
       if (input.wasPressed('start') || input.wasPressed('jump')) {
-        loadLevel(0);
+        finishCrawl();
         break;
       }
       updateCrawl();
+      break;
+    case 'map':
+      updateMap(dt);
       break;
     case 'intro':
       if (stateTime > INTRO_SECONDS) {
@@ -200,8 +264,9 @@ function update(dt: number): void {
       }
       game.update(dt, input);
       if (game.outcome === 'dead') onDeath();
-      else if (game.outcome === 'clear') loadLevel(Math.min(levelIndex + 1, LEVELS.length - 1));
+      else if (game.outcome === 'clear') onClear();
       else if (game.outcome === 'rescued') {
+        markCleared(progress, game.level.name, stats.score);
         recordBest();
         endingScore.textContent = String(stats.score).padStart(6, '0');
         setState('ending');
@@ -231,6 +296,10 @@ function update(dt: number): void {
 function render(alpha: number): void {
   if (state === 'crawl') {
     renderStars();
+    return;
+  }
+  if (state === 'map') {
+    worldMap.draw(ctx, sprites, progress, animTime);
     return;
   }
   // Pausado no hay tick nuevo: dibujar en la posición actual
@@ -317,8 +386,13 @@ for (const btn of document.querySelectorAll<HTMLButtonElement>('#touch button[da
   btn.addEventListener('lostpointercapture', release);
 }
 
-// Tocar la pantalla del juego sirve para empezar y para salir del final
-$('game').addEventListener('pointerdown', () => {
+// Tocar la pantalla del juego sirve para empezar, salir del final y elegir nivel en el mapa
+$('game').addEventListener('pointerdown', (e) => {
+  if (state === 'map') {
+    const r = canvas.getBoundingClientRect();
+    mapTap = worldMap.nodeAt(((e.clientX - r.left) / r.width) * SCREEN_W, ((e.clientY - r.top) / r.height) * SCREEN_H);
+    return;
+  }
   if (state === 'title' || state === 'crawl' || state === 'ending' || state === 'paused') input.press('start', 'tap');
 });
 window.addEventListener('pointerup', () => input.release('start', 'tap'));

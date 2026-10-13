@@ -304,6 +304,23 @@ body {
   opacity: 0.8;
 }
 
+/* ---------- Mapa de niveles ---------- */
+#screen-map {
+  justify-content: space-between;
+  padding: calc(10px * var(--scale)) 0 calc(4px * var(--scale));
+}
+
+.map-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(4px * var(--scale));
+}
+
+.map-hint {
+  color: var(--white);
+}
+
 /* ---------- Entre niveles ---------- */
 #screen-intro {
   gap: calc(14px * var(--scale));
