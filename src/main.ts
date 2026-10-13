@@ -326,7 +326,29 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyM') sound.toggleMute();
   if (e.code === 'KeyC') screen.toggleControls();
   if (e.code === 'KeyR') resetGame();
+  if (e.code === 'KeyL') goToMap();
 });
+
+/** Ir al mapa desde cualquier pantalla (también con la tecla L). Desde el título empieza una partida nueva. */
+function goToMap(): void {
+  if (state === 'map') return;
+  if (state === 'playing' || state === 'ending') recordBest();
+  sound.setPaused(false);
+  input.reset();
+  if (state === 'title' || state === 'gameover' || state === 'ending') stats = newStats();
+  if (state === 'crawl') {
+    finishCrawl();
+    return;
+  }
+  enterMap();
+}
+
+const mapBtn = $('map-btn');
+mapBtn.addEventListener('click', () => {
+  goToMap();
+  mapBtn.blur();
+});
+mapBtn.addEventListener('keydown', (e) => e.preventDefault());
 
 /** Reiniciar: vuelve al título desde cualquier estado (también con la tecla R). */
 function resetGame(): void {

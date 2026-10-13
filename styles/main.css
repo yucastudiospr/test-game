@@ -392,7 +392,8 @@ body.touch .kb-only {
   transform: translateY(1px);
 }
 
-#reset-btn .arrow {
+#reset-btn .arrow,
+#map-btn .arrow {
   font: 11px sans-serif;
   line-height: 7px;
 }

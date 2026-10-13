@@ -47,7 +47,7 @@
           <div class="controls-help kb-only">
             <p class="small">FLECHAS MOVER · ABAJO AGACHARSE</p>
             <p class="small">Z SALTAR · X CORRER · M SONIDO</p>
-            <p class="small">C BOTONES · R REINICIAR</p>
+            <p class="small">C BOTONES · L MAPA · R REINICIAR</p>
           </div>
           <p class="small muted">RECORD <span id="title-best">000000</span></p>
         </div>
@@ -55,9 +55,9 @@
         <!-- Final: Jose rescata a Yazmín -->
         <div id="screen-ending" class="overlay hidden">
           <div class="ending-box">
-            <p>¡GRACIAS JOSE!</p>
-            <p>MI CORAZON SIEMPRE</p>
-            <p>FUE TUYO <i class="px-heart"></i></p>
+            <p>NO HAY REY KOOPON</p>
+            <p>QUE PUEDA CON</p>
+            <p>NUESTRO AMOR <i class="px-heart"></i></p>
           </div>
           <p class="small">PUNTOS <span id="ending-score">000000</span></p>
           <p id="ending-press" class="small blink hidden">
@@ -123,8 +123,11 @@
       </div>
     </div>
 
-    <!-- Botones fijos: reiniciar la partida (R) y mostrar u ocultar los botones en pantalla (C) -->
+    <!-- Botones fijos: ir al mapa (L), reiniciar la partida (R) y mostrar u ocultar los botones en pantalla (C) -->
     <div id="topbar">
+      <button id="map-btn" type="button" title="Ir al mapa de niveles (L)">
+        <span class="arrow">▦</span>MAPA
+      </button>
       <button id="reset-btn" type="button" title="Volver al inicio (R)">
         <span class="arrow">↺</span>REINICIAR
       </button>

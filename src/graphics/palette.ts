@@ -2,6 +2,8 @@
 export const PAL = {
   // Cielo de atardecer rosado (en bandas, como las paletas limitadas de la época)
   sky: ['#ffb6d9', '#ffc2df', '#ffcce5', '#ffd6e8'],
+  // Cielo de noche (Mundo 3): morados con el horizonte rosado
+  nightSky: ['#2a1442', '#3b1d58', '#55286e', '#7a3a84'],
   cloud: '#fff4fa',
   cloudShade: '#e6d5ff',
   cloudOutline: '#b99be8',

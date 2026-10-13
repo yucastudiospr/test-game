@@ -1,13 +1,15 @@
 import { SCREEN_H, SCREEN_W, TILE } from '../config';
+import type { Theme } from '../world/level';
 import type { TileMap } from '../world/tilemap';
 import { PAL } from './palette';
 import type { SpriteSheet } from './sprites';
 
 /** Cielo en bandas horizontales (las paletas del NES no tenían degradados reales). */
-export function drawSky(ctx: CanvasRenderingContext2D): void {
-  const bands = PAL.sky.length;
+export function drawSky(ctx: CanvasRenderingContext2D, theme: Theme = 'overworld'): void {
+  const sky = theme === 'night' ? PAL.nightSky : PAL.sky;
+  const bands = sky.length;
   const bandH = Math.ceil(SCREEN_H / bands);
-  PAL.sky.forEach((color, i) => {
+  sky.forEach((color, i) => {
     ctx.fillStyle = color;
     ctx.fillRect(0, i * bandH, SCREEN_W, bandH);
   });

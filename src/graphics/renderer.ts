@@ -30,6 +30,7 @@ export class WorldRenderer {
     };
     this.art = {
       overworld: common,
+      night: common,
       underground: { ...common, [Tile.Ground]: s.underground.ground, [Tile.Brick]: s.underground.brick },
     };
   }

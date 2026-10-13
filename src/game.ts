@@ -549,7 +549,7 @@ export class Game implements EnemyHost {
       ctx.fillStyle = PAL.underBg;
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     } else {
-      drawSky(ctx);
+      drawSky(ctx, this.level.theme);
       drawScenery(ctx, s, camX, this.level.map);
     }
     for (const i of this.items) if (i.behindTiles) i.draw(ctx, s, camX, alpha, animTime);

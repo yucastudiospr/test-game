@@ -4,6 +4,7 @@ import { PAL } from '../graphics/palette';
 import type { SpriteSheet } from '../graphics/sprites';
 import { drawTinyText, tinyTextWidth } from '../graphics/tinyfont';
 import type { LevelData } from '../world/level';
+import { LEVELS_PER_WORLD, WORLDS } from '../world/levels';
 import type { Progress } from './progress';
 
 interface Point {
@@ -11,7 +12,7 @@ interface Point {
   y: number;
 }
 
-/** Posición de cada nivel en el mapa (centro del nodo, en px lógicos). Mundo 1 arriba, Mundo 2 abajo. */
+/** Posición de los 7 niveles de un mundo (centro del nodo, en px lógicos): 4 arriba y 3 abajo. */
 const NODES: readonly Point[] = [
   { x: 36, y: 84 },
   { x: 92, y: 84 },
@@ -21,17 +22,17 @@ const NODES: readonly Point[] = [
   { x: 148, y: 152 },
   { x: 92, y: 152 },
 ];
-/** El castillo de Yazmín, al final del camino: apoyado en el suelo, abajo a la izquierda. */
-const CASTLE_X = 36;
-/** Donde termina el camino punteado (la puerta del castillo queda a la izquierda). */
+/** El castillo de Yazmín (último mundo) o el tubo al mundo siguiente: abajo a la izquierda. */
+const EXIT_X = 36;
+/** Donde termina el camino punteado. */
 const PATH_END: Point = { x: 64, y: 152 };
 const NODE = 12;
 const JOSE_SPEED = 160;
 const TAP_RADIUS = 18;
 
 /**
- * Mapa de niveles: Jose camina entre los nodos y se elige cualquiera.
- * Los completados aparecen en rosado con un corazón.
+ * Mapa de niveles, una página por mundo: Jose camina entre los nodos y se
+ * elige cualquiera. Los completados aparecen en rosado con un corazón.
  */
 export class WorldMap {
   selected = 0;
@@ -39,9 +40,20 @@ export class WorldMap {
 
   constructor(private readonly levels: readonly LevelData[]) {}
 
+  /** Mundo (página) del nivel elegido, desde 0. */
+  get world(): number {
+    return Math.floor(this.selected / LEVELS_PER_WORLD);
+  }
+
+  private node(index: number): Point {
+    return NODES[index % LEVELS_PER_WORLD]!;
+  }
+
   select(index: number, instant = false): void {
+    const prevWorld = this.world;
     this.selected = Math.max(0, Math.min(this.levels.length - 1, index));
-    if (instant) this.jose = { ...NODES[this.selected]! };
+    // Al cambiar de mundo Jose aparece directamente en el nodo nuevo
+    if (instant || this.world !== prevWorld) this.jose = { ...this.node(this.selected) };
   }
 
   move(delta: number): boolean {
@@ -51,18 +63,20 @@ export class WorldMap {
     return true;
   }
 
-  /** Índice del nodo cerca de (x, y) en px lógicos, o null. */
+  /** Índice del nivel cuyo nodo está cerca de (x, y) en px lógicos, o null. Tocar la salida cambia de mundo. */
   nodeAt(x: number, y: number): number | null {
-    for (let i = 0; i < this.levels.length; i++) {
-      const n = NODES[i]!;
+    const first = this.world * LEVELS_PER_WORLD;
+    for (let i = first; i < Math.min(first + LEVELS_PER_WORLD, this.levels.length); i++) {
+      const n = this.node(i);
       if (Math.abs(n.x - x) <= TAP_RADIUS && Math.abs(n.y - y) <= TAP_RADIUS) return i;
     }
+    if (this.world < WORLDS - 1 && Math.abs(EXIT_X - x) <= 28 && y > 120 && y < 210) return first + LEVELS_PER_WORLD;
     return null;
   }
 
   /** Jose se desliza hasta el nodo elegido. */
   update(dt: number): void {
-    const target = NODES[this.selected]!;
+    const target = this.node(this.selected);
     for (const k of ['x', 'y'] as const) {
       const d = target[k] - this.jose[k];
       const step = JOSE_SPEED * dt;
@@ -71,7 +85,9 @@ export class WorldMap {
   }
 
   draw(ctx: CanvasRenderingContext2D, s: SpriteSheet, progress: Progress, time: number): void {
-    drawSky(ctx);
+    const world = this.world;
+    const lastWorld = world === WORLDS - 1;
+    drawSky(ctx, lastWorld ? 'night' : 'overworld');
     ctx.drawImage(s.cloudBig, 24, 14);
     ctx.drawImage(s.cloudSmall, 176, 30);
     ctx.drawImage(s.cloudSmall, 118, 52);
@@ -87,8 +103,12 @@ export class WorldMap {
       ctx.drawImage(s.ground, tx * TILE, groundY + TILE);
     }
 
-    // Camino punteado entre nodos y hasta el castillo
-    const path = [...NODES.slice(0, this.levels.length), PATH_END];
+    // Niveles de este mundo
+    const first = world * LEVELS_PER_WORLD;
+    const page = this.levels.slice(first, first + LEVELS_PER_WORLD);
+
+    // Camino punteado entre nodos y hasta la salida
+    const path = [...NODES.slice(0, page.length), PATH_END];
     ctx.fillStyle = PAL.hardDark;
     for (let i = 0; i + 1 < path.length; i++) {
       const a = path[i]!;
@@ -100,12 +120,25 @@ export class WorldMap {
       }
     }
 
-    // Castillo de Yazmín, sobre el suelo
-    ctx.drawImage(s.castle, CASTLE_X - Math.floor(s.castle.width / 2), groundY - s.castle.height);
+    // Salida: el castillo de Yazmín en el último mundo; un tubo al mundo siguiente en los demás
+    if (lastWorld) {
+      ctx.drawImage(s.castle, EXIT_X - Math.floor(s.castle.width / 2), groundY - s.castle.height);
+    } else {
+      const px = EXIT_X - TILE;
+      ctx.drawImage(s.pipeTopL, px, groundY - 3 * TILE);
+      ctx.drawImage(s.pipeTopR, px + TILE, groundY - 3 * TILE);
+      for (let i = 1; i <= 2; i++) {
+        ctx.drawImage(s.pipeL, px, groundY - 3 * TILE + i * TILE);
+        ctx.drawImage(s.pipeR, px + TILE, groundY - 3 * TILE + i * TILE);
+      }
+      const label = `${world + 2}`;
+      drawTinyText(ctx, label, EXIT_X - Math.floor(tinyTextWidth(label) / 2), groundY - 3 * TILE - 8, PAL.white, PAL.outline);
+    }
 
     // Nodos
-    this.levels.forEach((level, i) => {
-      const n = NODES[i]!;
+    page.forEach((level, k) => {
+      const i = first + k;
+      const n = NODES[k]!;
       const cleared = level.name in progress.cleared;
       const x = n.x - NODE / 2;
       const y = n.y - NODE / 2;
@@ -128,7 +161,8 @@ export class WorldMap {
     });
 
     // Jose parado sobre el nodo (da saltitos cuando está quieto)
-    const idle = this.jose.x === NODES[this.selected]!.x && this.jose.y === NODES[this.selected]!.y;
+    const target = this.node(this.selected);
+    const idle = this.jose.x === target.x && this.jose.y === target.y;
     const hop = idle && Math.floor(time * 3) % 2 === 0 ? 2 : 0;
     const img = idle ? s.jose.idle.r : s.jose.walk1.r;
     ctx.drawImage(img, Math.round(this.jose.x) - 8, Math.round(this.jose.y) - NODE / 2 - img.height - hop);
